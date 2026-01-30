@@ -19,7 +19,7 @@ p + bb_grid(col = "grey50", lty = "dashed") + bb_point(pch = 19)
 
 
 ## ----plotbb-layer-------------------------------------------------------------
-#| fig-width: 12
+#| fig-height: 4
 p2 <- p + bb_point() + bb_lm(bb_aes(group = cyl), lwd = 2)
 p3 <- p2 + bb_lm(col = "red", lwd = 3, lty = "dotted")
 p4 <- p + bb_text(bb_aes(label = cyl), cex = 2)
@@ -27,7 +27,6 @@ aplot::plot_list(p2, p3, p4, ncol = 3, tag_levels = "A")
 
 
 ## ----plotbb-line-seg-errorbar-------------------------------------------------
-#| fig-width: 12
 d2 <- group_by(mtcars, cyl) %>%
   summarize(
     x = cyl[1],
@@ -49,15 +48,38 @@ aplot::plot_list(g1, g2, ncol = 2, tag_levels = "A")
 
 
 ## ----plotbb-bar---------------------------------------------------------------
-#| fig-width: 8
-bbplot(mtcars, bb_aes(cyl, mpg, col = factor(cyl))) +
+mtcars$cyl <- factor(mtcars$cyl, levels = c(8, 4, 6))
+bbplot(mtcars, bb_aes(cyl, col = cyl)) +
   bb_bar(stat = "count") +
   bb_legend(position = "topleft")
 
 
+## ----plotbb-bar-identity------------------------------------------------------
+dbar <- group_by(mtcars, cyl) %>%
+  summarize(mpg = mean(mpg), .groups = "drop")
+bbplot(dbar, bb_aes(cyl, mpg, col = cyl)) +
+  bb_bar() +
+  bb_legend(position = "topleft")
+
+
+## ----plotbb-boxplot-----------------------------------------------------------
+bbplot(mtcars, bb_aes(factor(cyl), mpg)) +
+  bb_boxplot(fill = "grey90")
+
+
+## ----plotbb-hist--------------------------------------------------------------
+bbplot(mtcars, bb_aes(mpg)) +
+  bb_hist(col = "grey80", border = "white")
+
+
+## ----plotbb-signif------------------------------------------------------------
+bbplot(mtcars, bb_aes(factor(cyl), mpg)) +
+  bb_boxplot(fill = "grey90") +
+  bb_signif(comparisons = list(c("4", "6"), c("4", "8")))
+
+
 ## ----plotbb-heatmap-----------------------------------------------------------
-#| fig-width: 10
-#| fig-height: 10
+#| fig-height: 12
 df <- data.frame(
   x = rep(1:10, 12),
   y = rep(1:12, each = 10),
@@ -88,7 +110,7 @@ p2 + bb_labs(
 
 
 ## ----plotbb-theme-------------------------------------------------------------
-#| fig-width: 10
+#| fig-height: 6
 g <- p2 +
   bb_theme(
     col.main = "red",
@@ -101,7 +123,7 @@ aplot::plot_list(g, g2, ncol = 2, tag_levels = "A")
 
 
 ## ----plotbb-theme-expand------------------------------------------------------
-#| fig-width: 10
+#| fig-height: 6
 p4 <- p3 + bb_theme_expand()
 aplot::plot_list(p4, p3, ncol = 2, tag_levels = "A")
 
@@ -119,6 +141,13 @@ p + bb_point(pch = 19, cex = 2) +
   bb_theme_deepblue()
 
 
+## ----plotbb-theme-bw-minimal--------------------------------------------------
+#| fig-height: 6
+g_bw <- p2 + bb_theme_expand() + bb_theme_bw() + bb_title("bb_theme_bw")
+g_min <- p2 + bb_theme_expand() + bb_theme_minimal() + bb_title("bb_theme_minimal")
+aplot::plot_list(g_bw, g_min, ncol = 2, tag_levels = "A")
+
+
 ## ----plotbb-scale-manual------------------------------------------------------
 pal <- c(`4` = "#1b9e77", `6` = "#d95f02", `8` = "#7570b3")
 bbplot(mtcars, bb_aes(mpg, disp, col = factor(cyl))) +
@@ -134,17 +163,33 @@ bbplot(mtcars, bb_aes(mpg, disp, col = hp)) +
   bb_legend()
 
 
+## ----plotbb-scale-aes---------------------------------------------------------
+#| fig-width: 16
+p5 <- bbplot(mtcars, bb_aes(mpg, disp, col = factor(cyl), pch = factor(gear), cex = hp)) +
+  bb_point() +
+  bb_scale_cex_continuous(range = c(0.8, 2)) +
+  bb_legend(aesthetic = "col", position = "topleft") +
+  bb_legend(aesthetic = "pch", position = "bottomleft")
+
+p6 <- bbplot(mtcars, bb_aes(mpg, disp, lty = factor(gear))) +
+  bb_lm(lwd = 2) +
+  bb_scale_lty_manual(values = c(`3` = "solid", `4` = "dashed", `5` = "dotted")) +
+  bb_legend(aesthetic = "lty", position = "topleft")
+
+aplot::plot_list(p5, p6, ncol = 2, tag_levels = "A")
+
+
 ## ----plotbb-legend------------------------------------------------------------
 p + bb_point(pch = 19) + bb_legend()
 
 
 ## ----plotbb-facet-------------------------------------------------------------
-#| fig-width: 10
+#| fig-height: 4
 p + bb_point(pch = 19) + bb_facet_wrap(~cyl, ncol = 3)
 
 
 ## ----plotbb-facet-free--------------------------------------------------------
-#| fig-width: 10
+#| fig-height: 4
 p + bb_point(pch = 19) + bb_facet_wrap(~cyl, ncol = 3, scales = "free_y")
 
 
@@ -171,12 +216,11 @@ pp <- as.bbplot(f) +
 
 ## ----plotbb-base--------------------------------------------------------------
 pp + (~points(30, 400, pch = 19, col = "red", cex = 3)) +
-  ~text(30, 420, label = "hae fun :)", col = "blue", cex = 1.2)
+  ~text(30, 420, label = "have fun :)", col = "blue", cex = 1.2)
 
 
 ## ----plotbb-ape---------------------------------------------------------------
-#| fig-width: 8
-#| fig-height: 7
+#| fig-height: 8.5
 require(ape)
 set.seed(2020 - 09 - 10)
 x = rtree(10)
